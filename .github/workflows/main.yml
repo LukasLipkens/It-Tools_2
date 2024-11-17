@@ -17,12 +17,11 @@ jobs:
       run: echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        
+
     - name: Deploy to server
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER: ${{ secrets.SERVER }}
         USERNAME: ${{ secrets.USERNAME }}
       run: |
-        ssh -i $SSH_PRIVATE_KEY $USERNAME@$SERVER 'rm -rf /var/www/html/*'
-        scp -i $SSH_PRIVATE_KEY -r ./ $USERNAME@$SERVER:/var/www/html/
+        ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
+        scp -i private_key -r ./ $USERNAME@$SERVER:/var/www/html/
