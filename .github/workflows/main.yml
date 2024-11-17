@@ -18,6 +18,9 @@ jobs:
       env:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Schrijft de SSH private key naar een bestand en stelt de juiste permissies in.
 
+    - name: Create .ssh directory
+      run: mkdir -p ~/.ssh  # Maakt de .ssh directory aan als deze nog niet bestaat.
+
     - name: Add server to known_hosts
       run: ssh-keyscan $SERVER >> ~/.ssh/known_hosts
       env:
@@ -30,6 +33,6 @@ jobs:
       run: |
         ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
         scp -i private_key -r ./ $USERNAME@$SERVER:/var/www/html/
-        
+
       # Verwijdert alle bestanden in de doelmap op de server.
       # Kopieert alle bestanden uit de repository naar de doelmap op de server.
