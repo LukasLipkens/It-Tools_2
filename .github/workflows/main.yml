@@ -26,4 +26,4 @@ jobs:
         USERNAME: ${{ secrets.USERNAME }}
       run: |
         ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
-        scp -i private_key -r ./ $USERNAME@$SERVER:/var/www/html/
+        scp -i private_key -r ./* $USERNAME@$SERVER:/var/www/html/
