@@ -3,20 +3,25 @@ name: Deploy Website
 on:
   push:
     branches:
-      - main
+      - main  # De workflow wordt geactiveerd bij elke push naar de 'main' branch.
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # De workflow draait op de laatste versie van Ubuntu.
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2  # Haalt de laatste versie van de code uit de repository.
 
     - name: Create SSH key file
       run: echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
       env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Schrijft de SSH private key naar een bestand en stelt de juiste permissies in.
+
+    - name: Add server to known_hosts
+      run: ssh-keyscan $SERVER >> ~/.ssh/known_hosts
+      env:
+        SERVER: ${{ secrets.SERVER }}  # Voegt de server toe aan de 'known_hosts' file om host key verificatie te voorkomen.
 
     - name: Deploy to server
       env:
@@ -25,3 +30,6 @@ jobs:
       run: |
         ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
         scp -i private_key -r ./ $USERNAME@$SERVER:/var/www/html/
+        
+      # Verwijdert alle bestanden in de doelmap op de server.
+      # Kopieert alle bestanden uit de repository naar de doelmap op de server.
