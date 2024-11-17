@@ -3,36 +3,21 @@ name: Deploy Website
 on:
   push:
     branches:
-      - main  # De workflow wordt geactiveerd bij elke push naar de 'main' branch.
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # De workflow draait op de laatste versie van Ubuntu.
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Haalt de laatste versie van de code uit de repository.
-
-    - name: Create SSH key file
-      run: echo "$SSH_PRIVATE_KEY" > private_key && chmod 600 private_key
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}  # Schrijft de SSH private key naar een bestand en stelt de juiste permissies in.
-
-    - name: Create .ssh directory
-      run: mkdir -p ~/.ssh  # Maakt de .ssh directory aan als deze nog niet bestaat.
-
-    - name: Add server to known_hosts
-      run: ssh-keyscan $SERVER >> ~/.ssh/known_hosts
-      env:
-        SERVER: ${{ secrets.SERVER }}  # Voegt de server toe aan de 'known_hosts' file om host key verificatie te voorkomen.
+      uses: actions/checkout@v2
 
     - name: Deploy to server
       env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         SERVER: ${{ secrets.SERVER }}
         USERNAME: ${{ secrets.USERNAME }}
       run: |
-        ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
-        scp -i private_key -r ./ $USERNAME@$SERVER:/var/www/html/
-
-      # Verwijdert alle bestanden in de doelmap op de server.
-      # Kopieert alle bestanden uit de repository naar de doelmap op de server.
+        ssh -i $SSH_PRIVATE_KEY $USERNAME@$SERVER 'rm -rf /var/www/html/*'
+        scp -i $SSH_PRIVATE_KEY -r ./ $USERNAME@$SERVER:/var/www/html/
