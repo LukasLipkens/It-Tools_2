@@ -24,4 +24,4 @@ jobs:
         port: 22
         script: |
           rm -rf /var/www/html/*
-          scp -r ./* ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/var/www/html/
+          scp -r ./* ${{ secrets.USERNAME }}@${{ secrets.SERVER }}:/var/www/html/
