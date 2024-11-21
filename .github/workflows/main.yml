@@ -13,13 +13,6 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup SSH and Add server to known_hosts
-      run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
-        chmod 600 private_key
-        mkdir -p ~/.ssh
-        ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
-
     - name: Deploy to server
       env:
         SERVER: ${{ secrets.SERVER }}
