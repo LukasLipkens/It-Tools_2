@@ -13,12 +13,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2  # Haalt de code uit de repository op
 
+    - name: Add server to known_hosts # Voegt de server toe aan de lijst van bekende hosts in github
+      run: |
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
+
     - name: Deploy to server
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SERVER }}  # De server waarnaar gedeployed moet worden
         username: ${{ secrets.USERNAME }}  # De gebruikersnaam voor SSH
         key: ${{ secrets.SSH_PRIVATE_KEY }}  # De geheime SSH-sleutel
+
         # Verwijdert alle bestanden in de /var/www/html directory op de server
         # Kopieert alle bestanden van de huidige directory naar de /var/www/html directory op de server
         script: |
