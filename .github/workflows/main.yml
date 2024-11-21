@@ -3,20 +3,24 @@ name: Deploy Website
 on:
   push:
     branches:
-      - main
+      - main  # Deze workflow wordt geactiveerd bij een push naar de 'main' branch
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # De job draait op de laatste versie van Ubuntu
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2  # Haalt de code uit de repository op
 
     - name: Deploy to server
-      env:
-        SERVER: ${{ secrets.SERVER }}
-        USERNAME: ${{ secrets.USERNAME }}
-      run: |
-        ssh -i ${{secrets.SSH_PRIVATE_KEY}} $USERNAME@$SERVER 'rm -rf /var/www/html/*'
-        scp -i ${{secrets.SSH_PRIVATE_KEY}} -r ./* $USERNAME@$SERVER:/var/www/html/
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SERVER }}  # De server waarnaar gedeployed moet worden
+        username: ${{ secrets.USERNAME }}  # De gebruikersnaam voor SSH
+        key: ${{ secrets.SSH_PRIVATE_KEY }}  # De geheime SSH-sleutel
+        # Verwijdert alle bestanden in de /var/www/html directory op de server
+        # Kopieert alle bestanden van de huidige directory naar de /var/www/html directory op de server
+        script: |
+          rm -rf /var/www/html/*  
+          scp -r ./* ${{ secrets.USERNAME }}@${{ secrets.SERVER }}:/var/www/html/  
