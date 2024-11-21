@@ -3,30 +3,28 @@ name: Deploy Website
 on:
   push:
     branches:
-      - main  # Deze workflow wordt geactiveerd bij een push naar de 'main' branch
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  # De job draait op de laatste versie van Ubuntu
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2  # Haalt de code uit de repository op
+      uses: actions/checkout@v2
 
-    - name: Add server to known_hosts # Voegt de server toe aan de lijst van bekende hosts in github
+    - name: Setup SSH and Add server to known_hosts
       run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
 
-    - name: Deploy to server
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SERVER }}  # De server waarnaar gedeployed moet worden
-        username: ${{ secrets.USERNAME }}  # De gebruikersnaam voor SSH
-        key: ${{ secrets.SSH_PRIVATE_KEY }}  # De geheime SSH-sleutel
 
-        # Verwijdert alle bestanden in de /var/www/html directory op de server
-        # Kopieert alle bestanden van de huidige directory naar de /var/www/html directory op de server
-        script: |
-          rm -rf /var/www/html/*  
-          scp -r ./* ${{ secrets.USERNAME }}@${{ secrets.SERVER }}:/var/www/html/  
+    - name: Deploy to server
+      env:
+        SERVER: ${{ secrets.SERVER }}
+        USERNAME: ${{ secrets.USERNAME }}
+      run: |
+        ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
+        scp -i private_key -r ./* $USERNAME@$SERVER:/var/www/html/
