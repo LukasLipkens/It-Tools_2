@@ -28,7 +28,7 @@ jobs:
     # stap 4: voeg de server toe aan de known_hosts file
     - name: Setup SSH and Add server to known_hosts
       run: |
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+        echo "${{ secrets.SSH_PRIVATE_KEY_DEMO }}" > private_key
         chmod 600 private_key
         mkdir -p ~/.ssh
         ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
