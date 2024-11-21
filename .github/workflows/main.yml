@@ -1,18 +1,31 @@
 name: Deploy Website
 
+# de workflow wordt geactiveerd bij een push naar de 'main' branch
 on:
   push:
     branches:
       - main
 
+# de job genaaamd 'deploy' draait op de laatste versie van Ubuntu
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    # de job bestaat uit de volgende stappen
     steps:
+
+    # de code wordt uit de repository gehaald
+    # hiervoor wordt de actions/checkout@v2 action gebruikt (dit is een vooraf gedefinieerde action die vrij te gebruiken is)
     - name: Checkout code
       uses: actions/checkout@v2
 
+    # net als bij het verbinden met een nieuw ssh-systeem via mobaxterm, moet je de server toevoegen aan de known_hosts
+    # dit gebreurt dus niet op de server maar op de github actions runner (in de cloud)
+    # hoe doe je dit:
+    # stap 1: maak een private key file met de inhoud van de geheime ssh-sleutel in de secrets
+    # stap 2: zet de permissies van de private key file naar 600
+    # stap 3: maak een .ssh directory aan in de home directory van de github actions runner
+    # stap 4: voeg de server toe aan de known_hosts file
     - name: Setup SSH and Add server to known_hosts
       run: |
         echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
@@ -21,6 +34,9 @@ jobs:
         ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
 
 
+    # de private key file wordt gebruikt om te verbinden met de server (deze wordt na de deploy automatisch verwijderd)
+    # er wordt een verbinding gemaakt met de server en de bestanden in de /var/www/html directory worden verwijderd
+    # vervolgens worden alle bestanden in de huidige directory gekopieerd naar de /var/www/html directory op de server
     - name: Deploy to server
       env:
         SERVER: ${{ secrets.SERVER }}
