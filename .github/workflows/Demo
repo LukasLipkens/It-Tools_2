@@ -1,0 +1,30 @@
+on:
+  push: 
+    branches:
+      - Demo
+jobs: 
+  deploy: 
+    runs-ons: ubuntu-latest
+
+    steps:
+     - name: checkout
+       uses: actions/checkout@2
+
+     - name: make ssh and add SERVER
+       run: |
+        echo "${{ secrets.SSH_PRIVATE_KEY_DEMO }}" > private_key
+        chmod 600 private_key
+        mkdir -p ~/.ssh
+        ssh-keyscan -H ${{ secrets.SERVER }} >> ~/.ssh/known_hosts
+        
+    - name: deploy server
+      env:
+        SERVER: ${{ secrets.SERVER }}
+        USERNAME: ${{ secrets.USERNAME }}
+      run: |
+        ssh -i private_key $USERNAME@$SERVER 'rm -rf /var/www/html/*'
+        scp -i private_key -r ./* $USERNAME@$SERVER:/var/www/html/
+    
+        
+
+      
